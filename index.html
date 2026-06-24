@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard Toko</title>
+<style>
+  /* ── Tokens ── */
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #f97316;
+    --accent2: #fb923c;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #e8eaf2;
+    --muted: #7c82a3;
+    --radius: 12px;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header .logo {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  header h1 { font-size: 17px; font-weight: 700; }
+  header p { font-size: 12px; color: var(--muted); }
+
+  /* ── Config Banner ── */
+  #config-banner {
+    background: #1c1a10;
+    border: 1px solid #f97316;
+    border-radius: 8px;
+    margin: 16px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #config-banner label { font-size: 13px; color: var(--muted); }
+  #config-banner input {
+    width: 100%;
+    background: #0f1117;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13px;
+  }
+  #config-banner button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    margin: 0 16px 0;
+    gap: 8px;
+    padding: 16px 0 0;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    background: var(--surface2);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+  }
+  .tab.active {
+    background: var(--surface);
+    color: var(--accent);
+    border-color: var(--border);
+  }
+
+  /* ── Panel ── */
+  .panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0 var(--radius) var(--radius) var(--radius);
+    margin: 0 16px;
+    padding: 20px 16px;
+  }
+  .panel.active { display: block; }
+
+  /* ── Section title ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── Item Row ── */
+  .item-row {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+  }
+  .item-row .row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .item-row .row-num {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .remove-btn {
+    background: none;
+    border: none;
+    color: var(--red);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .remove-btn:hover { background: rgba(239,68,68,.15); }
+
+  /* ── Form Controls ── */
+  select, input[type=number], input[type=text] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 14px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  select:focus, input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  label.field-label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; }
+
+  .field-group { display: flex; gap: 10px; }
+  .field-group > * { flex: 1; }
+
+  /* ── Price tag ── */
+  .price-tag {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .subtotal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ── Add button ── */
+  .add-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    padding: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: all .2s;
+  }
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Summary box ── */
+  .summary-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin: 16px 0;
+  }
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+  }
+  .summary-total .label { font-size: 14px; font-weight: 700; }
+  .summary-total .value { font-size: 22px; font-weight: 900; color: var(--green); }
+
+  /* ── Payment section ── */
+  .pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+  .diskon-row { margin: 0 0 14px; }
+
+  /* ── Submit ── */
+  .submit-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: .02em;
+  }
+  .submit-btn:hover { background: var(--accent2); }
+  .submit-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform .3s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: var(--green); color: var(--green); }
+  #toast.error { border-color: var(--red); color: var(--red); }
+
+  /* ── Loading overlay ── */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🥟</div>
+  <div>
+    <h1>Dashboard Toko</h1>
+    <p id="status-text">Belum terhubung ke spreadsheet</p>
+  </div>
+</header>
+
+<!-- Config -->
+<div id="config-banner">
+  <div>
+    <label>🔗 URL Google Apps Script Web App</label>
+    <input type="text" id="api-url" placeholder="https://script.google.com/macros/s/AK.../exec" />
+  </div>
+  <button onclick="saveAndConnect()">💾 Simpan &amp; Hubungkan</button>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('penjualan')">🧾 Penjualan</div>
+  <div class="tab" onclick="switchTab('pengeluaran')">📦 Pengeluaran</div>
+</div>
+
+<!-- Panel Penjualan -->
+<div class="panel active" id="panel-penjualan">
+  <div class="section-label">Item Dibeli</div>
+  <div id="penjualan-items"></div>
+  <button class="add-btn" onclick="addPenjualanItem()">+ Tambah Produk</button>
+
+  <div class="summary-box" style="margin-top:20px">
+    <div class="section-label">Ringkasan Order</div>
+    <div id="penjualan-subtotals"></div>
+    <div class="diskon-row">
+      <label class="field-label">Diskon / Admin Fee (Rp)</label>
+      <input type="number" id="p-diskon" value="0" min="0" onchange="updatePenjualanSummary()" />
+    </div>
+    <div class="summary-total">
+      <span class="label">Total Bayar</span>
+      <span class="value" id="p-grand-total">Rp 0</span>
+    </div>
+  </div>
+
+  <div class="section-label">Pembayaran</div>
+  <div class="pay-grid">
+    <div>
+      <label class="field-label">Metode</label>
+      <select id="p-pembayaran"><option value="">-- Pilih --</option></select>
+    </div>
+    <div>
+      <label class="field-label">Bank / Dompet</label>
+      <select id="p-bank"><option value="">-- Pilih --</option></select>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="btn-penjualan" onclick="submitPenjualan()">
+    Simpan Penjualan ke Sheet
+  </button>
+</div>
+
+<!-- Panel Pengeluaran -->
+<div class="panel" id="panel-pengeluaran">
+  <div class="section-label">Bahan / Item Dibeli</div>
+  <div id="pengeluaran-items"></div>
+  <button class="add-btn" onclick="addPengeluaranItem()">+ Tambah Item</button>
+
+  <div class="summary-box" style="margin-top:20px">
+    <div class="section-label">Total Pengeluaran</div>
+    <div id="pengeluaran-subtotals"></div>
+    <div class="summary-total">
+      <span class="label">Total</span>
+      <span class="value" id="e-grand-total">Rp 0</span>
+    </div>
+  </div>
+
+  <div class="section-label">Pembayaran</div>
+  <div class="pay-grid">
+    <div>
+      <label class="field-label">Metode</label>
+      <select id="e-pembayaran"><option value="">-- Pilih --</option></select>
+    </div>
+    <div>
+      <label class="field-label">Bank / Dompet</label>
+      <select id="e-bank"><option value="">-- Pilih --</option></select>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="btn-pengeluaran" onclick="submitPengeluaran()">
+    Simpan Pengeluaran ke Sheet
+  </button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let API_URL = localStorage.getItem("gasUrl") || "";
+let products = [];
+let bahanList = [];
+let payments = [];
+let banks = [];
+let penjualanCount = 0;
+let pengeluaranCount = 0;
+
+// ─── Init ─────────────────────────────────────────────────
+window.onload = () => {
+  if (API_URL) {
+    document.getElementById("api-url").value = API_URL;
+    loadData();
+  }
+  addPenjualanItem();
+  addPengeluaranItem();
+};
+
+// ─── Config ───────────────────────────────────────────────
+function saveAndConnect() {
+  const url = document.getElementById("api-url").value.trim();
+  if (!url.startsWith("https://script.google.com")) {
+    showToast("URL tidak valid", "error"); return;
+  }
+  API_URL = url;
+  localStorage.setItem("gasUrl", url);
+  loadData();
+}
+
+async function loadData() {
+  try {
+    document.getElementById("status-text").textContent = "Menghubungkan...";
+    const [pRes, bRes, payRes] = await Promise.all([
+      fetch(`${API_URL}?action=getProducts`),
+      fetch(`${API_URL}?action=getBahan`),
+      fetch(`${API_URL}?action=getPaymentMethods`)
+    ]);
+    const pData = await pRes.json();
+    const bData = await bRes.json();
+    const payData = await payRes.json();
+
+    products = pData.products || [];
+    bahanList = bData.bahan || [];
+    payments = payData.payments || [];
+    banks = payData.banks || [];
+
+    populateDropdowns();
+    document.getElementById("status-text").textContent = `✅ Terhubung — ${products.length} produk dimuat`;
+    showToast("Berhasil terhubung ke spreadsheet", "success");
+  } catch(e) {
+    document.getElementById("status-text").textContent = "❌ Gagal terhubung";
+    showToast("Gagal terhubung. Cek URL dan izin.", "error");
+  }
+}
+
+function populateDropdowns() {
+  // Payment dropdowns for both panels
+  ["p-pembayaran", "e-pembayaran"].forEach(id => {
+    const el = document.getElementById(id);
+    el.innerHTML = '<option value="">-- Pilih --</option>';
+    payments.forEach(p => { el.innerHTML += `<option>${p}</option>`; });
+  });
+  ["p-bank", "e-bank"].forEach(id => {
+    const el = document.getElementById(id);
+    el.innerHTML = '<option value="">-- Pilih --</option>';
+    banks.forEach(b => { el.innerHTML += `<option>${b}</option>`; });
+  });
+
+  // Rebuild existing rows with fresh product options
+  document.querySelectorAll(".produk-select").forEach(sel => {
+    const val = sel.value;
+    sel.innerHTML = '<option value="">-- Pilih Produk --</option>';
+    products.forEach(p => {
+      sel.innerHTML += `<option value="${p.name}" data-price="${p.price}">${p.name} — ${fmt(p.price)}</option>`;
+    });
+    sel.value = val;
+  });
+
+  document.querySelectorAll(".bahan-select").forEach(sel => {
+    const val = sel.value;
+    sel.innerHTML = '<option value="">-- Pilih Bahan --</option>';
+    bahanList.forEach(b => {
+      sel.innerHTML += `<option value="${b.name}" data-price="${b.biaya}">${b.name}${b.biaya ? ' — '+fmt(b.biaya) : ''}</option>`;
+    });
+    sel.value = val;
+  });
+}
+
+// ─── Tabs ─────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach((t, i) => {
+    t.classList.toggle("active", (i === 0 && name === "penjualan") || (i === 1 && name === "pengeluaran"));
+  });
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById(`panel-${name}`).classList.add("active");
+}
+
+// ─── Penjualan Items ──────────────────────────────────────
+function addPenjualanItem() {
+  penjualanCount++;
+  const id = penjualanCount;
+  const container = document.getElementById("penjualan-items");
+  const div = document.createElement("div");
+  div.className = "item-row";
+  div.id = `pj-row-${id}`;
+  div.innerHTML = `
+    <div class="row-head">
+      <span class="row-num">Item #${id}</span>
+      <button class="remove-btn" onclick="removeRow('pj-row-${id}', 'penjualan')">✕</button>
+    </div>
+    <div>
+      <label class="field-label">Produk</label>
+      <select class="produk-select" onchange="onProdukChange(this, ${id})">
+        <option value="">-- Pilih Produk --</option>
+        ${products.map(p => `<option value="${p.name}" data-price="${p.price}">${p.name} — ${fmt(p.price)}</option>`).join("")}
+      </select>
+    </div>
+    <div class="field-group">
+      <div>
+        <label class="field-label">Qty</label>
+        <input type="number" class="qty-input" id="pj-qty-${id}" min="1" value="1" onchange="updatePenjualanSummary()" />
+      </div>
+      <div>
+        <label class="field-label">Harga (Rp)</label>
+        <input type="number" class="harga-input" id="pj-harga-${id}" min="0" value="0" onchange="updatePenjualanSummary()" />
+      </div>
+    </div>
+    <div class="subtotal-row">
+      <span>Subtotal</span>
+      <span class="price-tag" id="pj-sub-${id}">Rp 0</span>
+    </div>
+  `;
+  container.appendChild(div);
+  updatePenjualanSummary();
+}
+
+function onProdukChange(sel, id) {
+  const opt = sel.options[sel.selectedIndex];
+  const price = parseFloat(opt.dataset.price) || 0;
+  document.getElementById(`pj-harga-${id}`).value = price;
+  updatePenjualanSummary();
+}
+
+function updatePenjualanSummary() {
+  const rows = document.querySelectorAll("[id^='pj-row-']");
+  let total = 0;
+  let subtotalsHtml = "";
+  rows.forEach(row => {
+    const id = row.id.replace("pj-row-", "");
+    const produkSel = row.querySelector(".produk-select");
+    const produkName = produkSel ? produkSel.value : "";
+    const qty = parseFloat(document.getElementById(`pj-qty-${id}`)?.value) || 0;
+    const harga = parseFloat(document.getElementById(`pj-harga-${id}`)?.value) || 0;
+    const sub = qty * harga;
+    const subEl = document.getElementById(`pj-sub-${id}`);
+    if (subEl) subEl.textContent = `Rp ${fmt(sub)}`;
+    if (produkName) {
+      subtotalsHtml += `<div class="subtotal-row"><span>${produkName} ×${qty}</span><span>${fmt(sub)}</span></div>`;
+      total += sub;
+    }
+  });
+  const diskon = parseFloat(document.getElementById("p-diskon")?.value) || 0;
+  const grand = Math.max(0, total - diskon);
+  document.getElementById("penjualan-subtotals").innerHTML = subtotalsHtml;
+  document.getElementById("p-grand-total").textContent = `Rp ${fmt(grand)}`;
+}
+
+// ─── Pengeluaran Items ────────────────────────────────────
+function addPengeluaranItem() {
+  pengeluaranCount++;
+  const id = pengeluaranCount;
+  const container = document.getElementById("pengeluaran-items");
+  const div = document.createElement("div");
+  div.className = "item-row";
+  div.id = `pe-row-${id}`;
+  div.innerHTML = `
+    <div class="row-head">
+      <span class="row-num">Item #${id}</span>
+      <button class="remove-btn" onclick="removeRow('pe-row-${id}', 'pengeluaran')">✕</button>
+    </div>
+    <div>
+      <label class="field-label">Bahan / Item</label>
+      <select class="bahan-select" onchange="onBahanChange(this, ${id})">
+        <option value="">-- Pilih Bahan --</option>
+        ${bahanList.map(b => `<option value="${b.name}" data-price="${b.biaya}">${b.name}${b.biaya ? ' — '+fmt(b.biaya) : ''}</option>`).join("")}
+      </select>
+    </div>
+    <div>
+      <label class="field-label">Atau ketik nama bahan (jika tidak ada di daftar)</label>
+      <input type="text" class="bahan-manual" id="pe-bahan-${id}" placeholder="Nama bahan..." oninput="updatePengeluaranSummary()" />
+    </div>
+    <div class="field-group">
+      <div>
+        <label class="field-label">Jumlah</label>
+        <input type="number" class="qty-input" id="pe-qty-${id}" min="1" value="1" onchange="updatePengeluaranSummary()" />
+      </div>
+      <div>
+        <label class="field-label">Harga Satuan (Rp)</label>
+        <input type="number" class="harga-input" id="pe-harga-${id}" min="0" value="0" onchange="updatePengeluaranSummary()" />
+      </div>
+    </div>
+    <div class="subtotal-row">
+      <span>Subtotal</span>
+      <span class="price-tag" id="pe-sub-${id}">Rp 0</span>
+    </div>
+  `;
+  container.appendChild(div);
+  updatePengeluaranSummary();
+}
+
+function onBahanChange(sel, id) {
+  const opt = sel.options[sel.selectedIndex];
+  const price = parseFloat(opt.dataset.price) || 0;
+  const name = opt.value;
+  document.getElementById(`pe-bahan-${id}`).value = name;
+  if (price > 0) document.getElementById(`pe-harga-${id}`).value = price;
+  updatePengeluaranSummary();
+}
+
+function updatePengeluaranSummary() {
+  const rows = document.querySelectorAll("[id^='pe-row-']");
+  let total = 0;
+  let subtotalsHtml = "";
+  rows.forEach(row => {
+    const id = row.id.replace("pe-row-", "");
+    const nameInput = document.getElementById(`pe-bahan-${id}`);
+    const name = nameInput ? nameInput.value.trim() : "";
+    const qty = parseFloat(document.getElementById(`pe-qty-${id}`)?.value) || 0;
+    const harga = parseFloat(document.getElementById(`pe-harga-${id}`)?.value) || 0;
+    const sub = qty * harga;
+    const subEl = document.getElementById(`pe-sub-${id}`);
+    if (subEl) subEl.textContent = `Rp ${fmt(sub)}`;
+    if (name) {
+      subtotalsHtml += `<div class="subtotal-row"><span>${name} ×${qty}</span><span>${fmt(sub)}</span></div>`;
+      total += sub;
+    }
+  });
+  document.getElementById("pengeluaran-subtotals").innerHTML = subtotalsHtml;
+  document.getElementById("e-grand-total").textContent = `Rp ${fmt(total)}`;
+}
+
+// ─── Remove Row ───────────────────────────────────────────
+function removeRow(rowId, type) {
+  const el = document.getElementById(rowId);
+  if (!el) return;
+  const siblings = document.querySelectorAll(`[id^="${rowId.split('-').slice(0,2).join('-')}-"]`);
+  if (siblings.length <= 1) { showToast("Minimal 1 item", "error"); return; }
+  el.remove();
+  if (type === "penjualan") updatePenjualanSummary();
+  else updatePengeluaranSummary();
+}
+
+// ─── Submit Penjualan ─────────────────────────────────────
+async function submitPenjualan() {
+  if (!API_URL) { showToast("Hubungkan ke spreadsheet dulu", "error"); return; }
+  const rows = document.querySelectorAll("[id^='pj-row-']");
+  const items = [];
+  let valid = true;
+
+  rows.forEach(row => {
+    const id = row.id.replace("pj-row-", "");
+    const produkSel = row.querySelector(".produk-select");
+    const produk = produkSel?.value || "";
+    const jumlah = parseFloat(document.getElementById(`pj-qty-${id}`)?.value) || 0;
+    const harga = parseFloat(document.getElementById(`pj-harga-${id}`)?.value) || 0;
+    if (!produk || jumlah <= 0) return; // skip empty rows
+    items.push({ produk, jumlah, harga, diskon: 0 });
+  });
+
+  if (items.length === 0) { showToast("Pilih minimal 1 produk", "error"); return; }
+
+  const diskon = parseFloat(document.getElementById("p-diskon").value) || 0;
+  // Apply diskon to first item only (atau bisa dibagi rata)
+  if (diskon > 0 && items.length > 0) items[0].diskon = diskon;
+
+  const pembayaran = document.getElementById("p-pembayaran").value;
+  const bank = document.getElementById("p-bank").value;
+  items.forEach(i => { i.pembayaran = pembayaran; i.bank = bank; });
+
+  const btn = document.getElementById("btn-penjualan");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Menyimpan...';
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "addPenjualan", data: items })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✅ ${data.message}`, "success");
+      resetPenjualan();
+    } else {
+      showToast("Gagal: " + data.error, "error");
+    }
+  } catch(e) {
+    showToast("Error: " + e.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Simpan Penjualan ke Sheet";
+  }
+}
+
+// ─── Submit Pengeluaran ───────────────────────────────────
+async function submitPengeluaran() {
+  if (!API_URL) { showToast("Hubungkan ke spreadsheet dulu", "error"); return; }
+  const rows = document.querySelectorAll("[id^='pe-row-']");
+  const items = [];
+
+  rows.forEach(row => {
+    const id = row.id.replace("pe-row-", "");
+    const bahan = document.getElementById(`pe-bahan-${id}`)?.value.trim() || "";
+    const jumlah = parseFloat(document.getElementById(`pe-qty-${id}`)?.value) || 0;
+    const hargaSatuan = parseFloat(document.getElementById(`pe-harga-${id}`)?.value) || 0;
+    if (!bahan || jumlah <= 0) return;
+    items.push({ bahan, jumlah, hargaSatuan });
+  });
+
+  if (items.length === 0) { showToast("Isi minimal 1 item", "error"); return; }
+
+  const pembayaran = document.getElementById("e-pembayaran").value;
+  const bank = document.getElementById("e-bank").value;
+  items.forEach(i => { i.pembayaran = pembayaran; i.bank = bank; });
+
+  const btn = document.getElementById("btn-pengeluaran");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Menyimpan...';
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "addPengeluaran", data: items })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✅ ${data.message}`, "success");
+      resetPengeluaran();
+    } else {
+      showToast("Gagal: " + data.error, "error");
+    }
+  } catch(e) {
+    showToast("Error: " + e.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Simpan Pengeluaran ke Sheet";
+  }
+}
+
+// ─── Reset ────────────────────────────────────────────────
+function resetPenjualan() {
+  document.getElementById("penjualan-items").innerHTML = "";
+  penjualanCount = 0;
+  document.getElementById("p-diskon").value = 0;
+  addPenjualanItem();
+}
+function resetPengeluaran() {
+  document.getElementById("pengeluaran-items").innerHTML = "";
+  pengeluaranCount = 0;
+  addPengeluaranItem();
+}
+
+// ─── Utils ────────────────────────────────────────────────
+function fmt(n) {
+  return Number(n).toLocaleString("id-ID");
+}
+
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  setTimeout(() => { t.className = ""; }, 3000);
+}
+</script>
+</body>
+</html>
